@@ -1,11 +1,24 @@
-import { FC } from "react"
+import { FC, useEffect, useState } from "react"
 import { ProfileDropdown } from "../ProfileDropdown"
 import Image from "next/image"
+import { useRouter } from "next/router"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface NavbarProps {}
 
 export const Navbar: FC<NavbarProps> = () => {
+  const router = useRouter()
+  const [active, setActive] = useState<"feed" | "trailers" | null>(null)
+
+  useEffect(() => {
+    if (router.pathname === "/feed" || router.pathname === "/") {
+      setActive("feed")
+    } else if (router.pathname === "/trailers") {
+      setActive("trailers")
+    }
+  }, [router.pathname])
+
+  console.log({ active, p: router.pathname })
   return (
     <div className="navbar border-b-2 bg-base-100 px-4">
       <div className="navbar-start w-2/3  gap-4">
@@ -19,27 +32,33 @@ export const Navbar: FC<NavbarProps> = () => {
             alt="logo"
           />
         </a>
-        <button
-          className="btn btn-square btn-ghost w-auto md:p-4"
-          onClick={() => {
-            window.open(`${window.location.origin}/studio`)
-          }}
-        >
-          Feed
-        </button>
-        <button
-          className="btn btn-square btn-ghost w-auto md:p-4"
-          onClick={() => {
-            window.open(`${window.location.origin}/studio`)
-          }}
-        >
-          Trailer
-        </button>
+        <div className="tabs">
+          <button
+            className={`btn btn-circle  w-auto md:p-4 ${
+              active === "feed" ? "btn-secondary" : "btn-ghost"
+            }`}
+            onClick={() => {
+              router.push("/feed")
+            }}
+          >
+            Feed
+          </button>
+          <button
+            className={`btn btn-circle w-auto md:p-4 ${
+              active === "trailers" ? "btn-secondary" : " btn-ghost"
+            }`}
+            onClick={() => {
+              router.push("/trailers")
+            }}
+          >
+            Trailer
+          </button>
+        </div>
       </div>
       <div className="navbar-end w-1/3">
         <div className="flex items-center space-x-4 w-full justify-end">
           <button
-            className="btn btn-square btn-primary w-auto md:p-4"
+            className="btn btn-circle btn-primary w-auto md:p-4"
             onClick={() => {
               window.open(`${window.location.origin}/studio`)
             }}

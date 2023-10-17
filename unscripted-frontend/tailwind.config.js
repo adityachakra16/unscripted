@@ -8,7 +8,7 @@ module.exports = {
       {
         amp: {
           primary: "#E60122",
-          secondary: "#E1E0F6",
+          secondary: "#101110",
           accent: "#FFC94F",
           neutral: "#333333",
           "base-300": "#FEFEFF",

@@ -8,7 +8,7 @@ export const TopPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Next & daisyUI</title>
+        <title>Unscripted</title>
         <meta
           name="description"
           content="A template for prototyping with Next.js and daisy UI"
