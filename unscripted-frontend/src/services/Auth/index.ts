@@ -1,13 +1,24 @@
 import router from "next/router"
 import { sendRequest } from "../Request"
+import { AuthKitSignInData } from "@safe-global/auth-kit"
 
-export async function login(email: string) {
-  await sendRequest(`${process.env.NEXT_PUBLIC_API_HOST}/auth/login`, {
+export async function login(
+  token: string,
+  publicKey: string,
+  signedInData: AuthKitSignInData
+) {
+  return await sendRequest(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
     method: "POST",
+    mode: "cors",
     headers: {
       "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
     },
-    body: JSON.stringify({ destination: email }),
+    body: JSON.stringify({
+      appPubKey: publicKey,
+      signedInData: signedInData,
+    }),
+    credentials: "include",
   })
 }
 

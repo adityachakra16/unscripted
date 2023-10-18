@@ -1,3 +1,4 @@
+import { UserContext, useProviderUserContext } from "@/context/UserContext"
 import "../styles/globals.css"
 import { ThemeProvider } from "next-themes"
 
@@ -6,10 +7,13 @@ import { QueryClient, QueryClientProvider } from "react-query"
 const queryClient = new QueryClient()
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const userContext = useProviderUserContext()
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Component {...pageProps} />
+        <UserContext.Provider value={userContext}>
+          <Component {...pageProps} />
+        </UserContext.Provider>
       </ThemeProvider>
     </QueryClientProvider>
   )

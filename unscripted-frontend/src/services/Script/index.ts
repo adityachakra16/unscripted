@@ -1,5 +1,6 @@
 import { useQuery } from "react-query"
 import { sendRequest } from "../Request"
+import { db, scriptsTable } from "../Db"
 
 export async function getLatestScripts() {
   return await sendRequest(
@@ -17,14 +18,8 @@ export function useLatestScripts() {
 }
 
 export async function getScriptsByHighestRating() {
-  return await sendRequest(
-    `${process.env.NEXT_PUBLIC_API_HOST}/scripts?orderBy=rating`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  )
+  const { results } = await db.prepare(`SELECT * FROM ${scriptsTable};`).all()
+  return results
 }
 
 export function useScriptsByHighestRating() {
@@ -61,4 +56,17 @@ export async function createScript(script: any) {
     },
     body: JSON.stringify(script),
   })
+}
+
+export async function publishScript(title: string, writer: string) {
+  // Insert a row into the table
+  const { meta: insert } = await db
+    .prepare(
+      `INSERT INTO ${scriptsTable} (id, title, writer) VALUES (1, ${title}, ${writer});`
+    )
+    .bind(0, "Bobby Tables")
+    .run()
+  const res = await insert.txn?.wait()
+  console.log({ res })
+  return res
 }

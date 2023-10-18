@@ -1,7 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { ScriptsService } from './scripts.service';
-import { CreateScriptDto } from './dto/create-script.dto';
-import { UpdateScriptDto } from './dto/update-script.dto';
+import { CreateScriptDto, UpdateScriptDto } from '@unscripted/shared-types';
 
 @Controller('scripts')
 export class ScriptsController {

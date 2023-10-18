@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateScriptDto } from './dto/create-script.dto';
-import { UpdateScriptDto } from './dto/update-script.dto';
-
+import { CreateScriptDto, UpdateScriptDto } from '@unscripted/shared-types';
 @Injectable()
 export class ScriptsService {
   create(createScriptDto: CreateScriptDto) {
