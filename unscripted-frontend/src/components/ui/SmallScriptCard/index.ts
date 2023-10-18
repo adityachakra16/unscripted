@@ -1,0 +1,1 @@
+export { SmallScriptCard } from "./SmallScriptCard"
