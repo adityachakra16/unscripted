@@ -1,8 +1,6 @@
 import { useUserContext } from "@/context/UserContext"
-import { fetchSigner, fetchUserProfile, useUserProfile } from "@/services/User"
 import { getWeb3Modal } from "@/services/Web3Modal"
 import { Web3AuthModalPack } from "@safe-global/auth-kit"
-import { getPublicCompressed } from "@toruslabs/eccrypto"
 import { FC, useEffect, useState } from "react"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

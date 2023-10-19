@@ -1,6 +1,6 @@
 import { useQuery } from "react-query"
 import { sendRequest } from "../Request"
-import { db, scriptsTable } from "../Db"
+import { getDb, scriptsTable } from "../Db"
 
 export async function getLatestScripts() {
   return await sendRequest(
@@ -19,6 +19,7 @@ export function useLatestScripts() {
 
 export async function getScriptsByHighestRating() {
   const { results } = await db.prepare(`SELECT * FROM ${scriptsTable};`).all()
+  console.log({ results })
   return results
 }
 
@@ -60,12 +61,15 @@ export async function createScript(script: any) {
 
 export async function publishScript(title: string, writer: string) {
   // Insert a row into the table
+  console.log({ title, writer })
+  const db = await getDb()
   const { meta: insert } = await db
     .prepare(
-      `INSERT INTO ${scriptsTable} (id, title, writer) VALUES (1, ${title}, ${writer});`
+      `INSERT INTO ${scriptsTable} (id, title, writer) VALUES (?, ?, ?);`
     )
-    .bind(0, "Bobby Tables")
+    .bind(0, title, writer)
     .run()
+  console.log({ insert })
   const res = await insert.txn?.wait()
   console.log({ res })
   return res
