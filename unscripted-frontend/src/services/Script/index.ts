@@ -18,6 +18,7 @@ export function useLatestScripts() {
 }
 
 export async function getScriptsByHighestRating() {
+  const db = await getDb()
   const { results } = await db.prepare(`SELECT * FROM ${scriptsTable};`).all()
   console.log({ results })
   return results
@@ -49,13 +50,16 @@ export async function getScript(scriptId: string) {
   )
 }
 
-export async function createScript(script: any) {
+export async function createScript(title: string, writer: string) {
   return await sendRequest(`${process.env.NEXT_PUBLIC_API_HOST}/scripts`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(script),
+    body: JSON.stringify({
+      title,
+      writer,
+    }),
   })
 }
 

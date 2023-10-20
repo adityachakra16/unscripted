@@ -8,6 +8,9 @@ import { AuthController } from './auth/auth.controller';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypegooseModule } from 'nestjs-typegoose';
+import { TablelandService } from './tableland/tableland.service';
+import { TablelandModule } from './tableland/tableland.module';
+import { ProvidersModule } from './providers/providers.module';
 
 @Module({
   imports: [
@@ -19,8 +22,10 @@ import { TypegooseModule } from 'nestjs-typegoose';
     ScriptsModule,
     CommentsModule,
     AuthModule,
+    TablelandModule,
+    ProvidersModule,
   ],
   controllers: [AppController, AuthController],
-  providers: [AppService],
+  providers: [AppService, TablelandService],
 })
 export class AppModule {}

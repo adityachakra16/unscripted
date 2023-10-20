@@ -1,7 +1,7 @@
 import { FC, useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import { storeImage } from "@/services/Images"
-import { publishScript } from "@/services/Script"
+import { createScript, publishScript } from "@/services/Script"
 import { useUserContext } from "@/context/UserContext"
 
 interface EditorProps {
@@ -53,7 +53,7 @@ export const Editor: FC<EditorProps> = ({ disabled }) => {
         <button
           className="btn btn-circle btn-primary w-36 md:p-4 "
           onClick={async () => {
-            await publishScript(title, content)
+            await createScript(title, content)
           }}
         >
           Publish

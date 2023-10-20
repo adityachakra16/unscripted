@@ -26,7 +26,7 @@ export class ScriptsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.scriptsService.findOne(+id);
+    return this.scriptsService.findOne(id);
   }
 
   @Patch(':id')

@@ -1,17 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { CreateScriptDto, UpdateScriptDto } from '@unscripted/shared-types';
+import { TablelandService } from 'src/tableland/tableland.service';
 @Injectable()
 export class ScriptsService {
-  create(createScriptDto: CreateScriptDto) {
-    return 'This action adds a new script';
+  constructor(private readonly tablelandService: TablelandService) {}
+
+  async create(createScriptDto: CreateScriptDto) {
+    return await this.tablelandService.createScript(
+      createScriptDto.title,
+      [],
+      createScriptDto.writer,
+    );
   }
 
-  findAll() {
-    return `This action returns all scripts`;
+  async findAll() {
+    console.log('findAll');
+    return await this.tablelandService.getScripts();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} script`;
+  async findOne(id: string) {
+    return await this.tablelandService.getScriptById(id);
   }
 
   update(id: number, updateScriptDto: UpdateScriptDto) {
