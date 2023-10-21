@@ -1,9 +1,43 @@
+import { Script } from "@unscripted/shared-types"
 import { FC } from "react"
+import Image from "next/image"
+import { timeSince, trim } from "@/services/Utils"
+import { useRouter } from "next/router"
 
 interface ScriptCardProps {
-  className?: string
+  script: Script
 }
 
-export const ScriptCard: FC<ScriptCardProps> = ({ children, className }) => {
-  return <div className={className}>{children}</div>
+export const ScriptCard: FC<ScriptCardProps> = ({ script }) => {
+  const router = useRouter()
+  return (
+    <div
+      className="card w-full bg-base-100 cursor-pointer hover:bg-base-200"
+      onClick={() => router.push(`/script/${script.id}`)}
+    >
+      <figure>
+        {script.image && <Image src={script.image} alt="script_img" />}
+      </figure>
+      <div className="card-body">
+        <h2 className="card-title">{script.title}</h2>
+        {script.genres?.map((genre) => {
+          return (
+            <div key={genre} className="badge badge-secondary">
+              {genre}
+            </div>
+          )
+        })}
+        {script.scene?.length && <p>{trim(script.scene[0], 100)}</p>}
+
+        {script.createdAt && (
+          <div className="card-actions justify-end">
+            <div className="badge badge-outline">
+              {timeSince(script.createdAt)}
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="w-full border-b-2 border-base-200 "></div>
+    </div>
+  )
 }
