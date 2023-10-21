@@ -78,7 +78,7 @@ export class TablelandService {
     console.log({ insert });
     const res = await insert.txn?.wait();
     console.log({ res });
-    return res;
+    return id;
   }
 
   async updateScript(

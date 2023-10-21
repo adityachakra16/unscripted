@@ -1,25 +1,64 @@
 import { Injectable } from '@nestjs/common';
 import { CreateScriptDto, UpdateScriptDto } from '@unscripted/shared-types';
+import { ethers } from 'ethers';
 import { TablelandService } from 'src/tableland/tableland.service';
+import { TransactionService } from 'src/transaction/transaction.service';
 @Injectable()
 export class ScriptsService {
-  constructor(private readonly tablelandService: TablelandService) {}
+  constructor(
+    private readonly tablelandService: TablelandService,
+    private readonly transactionService: TransactionService,
+  ) {}
 
   async create(createScriptDto: CreateScriptDto) {
-    return await this.tablelandService.createScript(
+    const artifactId = await this.tablelandService.createScript(
       createScriptDto.title,
       createScriptDto.content,
       createScriptDto.genres,
       createScriptDto.writer,
     );
+    const tx = await this.transactionService.createLiquidStakingContract(
+      createScriptDto.writer,
+      artifactId,
+      createScriptDto.title,
+    );
+    console.log({ tx });
+    return tx;
+  }
+
+  async populateStakedAmount(id: number) {
+    const stakedAmount = await this.transactionService.getStakedAmount(id);
+    const bigNumberValue = ethers.BigNumber.from(stakedAmount);
+    return bigNumberValue.toString();
   }
 
   async findAll() {
-    return await this.tablelandService.getScripts();
+    const scripts = await this.tablelandService.getScripts();
+    try {
+      const populatedScripts = await Promise.all(
+        scripts.map(async (script) => {
+          const rating = await this.populateStakedAmount(script.id);
+          return { ...script, rating };
+        }),
+      );
+      return populatedScripts;
+    } catch (error) {
+      console.log(error);
+    }
+    return scripts;
   }
 
   async findOne(id: string) {
-    return await this.tablelandService.getScriptById(id);
+    const script = await this.tablelandService.getScriptById(id);
+
+    try {
+      const rating = await this.populateStakedAmount(script.id);
+      console.log({ rating });
+      return { ...script, rating };
+    } catch (error) {
+      console.log(error);
+    }
+    return script;
   }
 
   async update(id: number, updateScriptDto: UpdateScriptDto) {

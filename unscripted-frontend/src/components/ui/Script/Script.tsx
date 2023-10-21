@@ -13,6 +13,7 @@ export const Script: FC<ScriptProps> = () => {
   const [content, setContent] = useState([] as Content[])
   const [title, setTitle] = useState("")
   const [genres, setGenres] = useState([] as string[])
+  const [rating, setRating] = useState(0)
   const contentRef = useRef<HTMLTextAreaElement>(null) // ref for the content textarea
 
   useEffect(() => {
@@ -45,9 +46,12 @@ export const Script: FC<ScriptProps> = () => {
         setTitle(scriptContent.title)
         setContent(scriptContent.content)
         setGenres(scriptContent.genres)
+        setRating(scriptContent.rating || 0)
       })()
     }
   }, [router.query?.scriptId])
+
+  if (!title) return <span className="loading loading-ring loading-lg"></span>
 
   return (
     <div className="flex flex-col px-64  justify-start pt-8 h-full">
@@ -60,18 +64,27 @@ export const Script: FC<ScriptProps> = () => {
       />
 
       <div className="flex flex-col gap-8 ml-8">
-        <div className="flex flex-row gap-2">
-          {genres &&
-            genres?.map((genre) => {
-              return (
-                <div
-                  key={genre}
-                  className="badge badge-secondary badge-outline"
-                >
-                  {genre}
-                </div>
-              )
-            })}
+        <div className="flex flex-row items-center space-x-4 w-full justify-between">
+          <div className="flex flex-row gap-2">
+            {genres &&
+              genres?.map((genre) => {
+                return (
+                  <div
+                    key={genre}
+                    className="badge badge-secondary badge-outline"
+                  >
+                    {genre}
+                  </div>
+                )
+              })}
+          </div>
+          <div className="flex flex-row items-center space-x-4 w-full justify-end">
+            {
+              <div className="badge badge-secondary">
+                {rating} staked tokens
+              </div>
+            }
+          </div>
         </div>
         {content?.length > 0 &&
           content.map((c, cIndex) => {

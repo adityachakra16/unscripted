@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("dotenv").config();
+require("@nomiclabs/hardhat-etherscan");
 
 // Read environment variables
 const {
@@ -21,6 +22,9 @@ module.exports = {
         runs: 200, // The number of runs may vary depending on your specific contract
       },
     },
+  },
+  etherscan: {
+    apiKey: process.env.POLYGONSCAN_API_KEY,
   },
   networks: {
     mumbai: {

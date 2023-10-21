@@ -8,11 +8,8 @@ export const ScriptPage: NextPage = () => {
   return (
     <>
       <Head>
-        <title>script</title>
-        <meta
-          name="description"
-          content="Write page description here."
-        />
+        <title>Unscripted</title>
+        <meta name="description" content="Write page description here." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
