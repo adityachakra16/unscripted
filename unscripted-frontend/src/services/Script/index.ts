@@ -102,16 +102,19 @@ export async function updateScript(
   })
 }
 
-async function getLiquidStakingContract(providerUri: string, scriptId: string) {
-  const provider = new ethers.providers.JsonRpcProvider(providerUri)
+async function getLiquidStakingContract(web3Provider: any, scriptId: string) {
+  console.log({ web3Provider })
+  const provider = new ethers.providers.Web3Provider(web3Provider)
+  console.log({ provider })
   const signer = provider.getSigner()
-
+  console.log({ signer })
   const factory = new ethers.Contract(
     POLYGON_MUMBAI_LIQUID_STAKING_FACTORY_ADDRESS,
     liquidStakingFactoryAbi,
     signer
   )
 
+  console.log({ factory })
   const liquidStakingAddress = await factory.artifactIdToStaking(scriptId)
   return new ethers.Contract(liquidStakingAddress, liquidStakingAbi, signer)
 }
@@ -121,12 +124,19 @@ export async function stakeOnScript(
   scriptId: string,
   amount: number
 ) {
+  console.log({
+    scriptId,
+    amount,
+  })
   const liquidStakingContract = await getLiquidStakingContract(
     provider,
     scriptId
   )
-  const tx = liquidStakingContract.stake(amount)
-  await tx.wait()
+  const tx = await liquidStakingContract.stake(amount, {
+    gasLimit: 1000000,
+  })
+  console.log({ tx })
+  return tx
 }
 
 export async function unstakeFromScript(

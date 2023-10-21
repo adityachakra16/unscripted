@@ -3,6 +3,7 @@ import { buyArtifact, getScript, stakeOnScript } from "@/services/Script"
 import { Content } from "@unscripted/shared-types"
 import { useRouter } from "next/router"
 import { FC, useEffect, useRef, useState } from "react"
+import Modal from "../Modal"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ScriptProps {}
@@ -14,6 +15,10 @@ export const Script: FC<ScriptProps> = () => {
   const [title, setTitle] = useState("")
   const [genres, setGenres] = useState([] as string[])
   const [rating, setRating] = useState(0)
+  const [cost, setCost] = useState(0)
+  const [openStakeModal, setOpenStakeModal] = useState(false)
+  const [openBuyModal, setOpenBuyModal] = useState(false)
+  const [stakingAmount, setStakingAmount] = useState(0)
   const contentRef = useRef<HTMLTextAreaElement>(null) // ref for the content textarea
 
   useEffect(() => {
@@ -46,7 +51,8 @@ export const Script: FC<ScriptProps> = () => {
         setTitle(scriptContent.title)
         setContent(scriptContent.content)
         setGenres(scriptContent.genres)
-        setRating(scriptContent.rating || 0)
+        setRating(scriptContent.rating || 1)
+        setCost(scriptContent.cost || 0)
       })()
     }
   }, [router.query?.scriptId])
@@ -115,31 +121,95 @@ export const Script: FC<ScriptProps> = () => {
       <div className="flex flex-row items-center space-x-4 w-full justify-end mt-8">
         <button
           className="btn btn-circle btn-outline w-36 md:p-4 "
-          onClick={async () => {
-            const res = await stakeOnScript(
-              provider,
-              router.query.scriptId as string,
-              1
-            )
-            console.log({ res })
+          onClick={() => {
+            setStakingAmount(0)
+            setOpenStakeModal(true)
           }}
         >
           Stake
         </button>
         <button
           className="btn btn-circle btn-outline w-36 md:p-4 "
-          onClick={async () => {
-            const res = await buyArtifact(
-              provider,
-              router.query.scriptId as string,
-              1
-            )
-            console.log({ res })
+          onClick={() => {
+            setOpenBuyModal(true)
           }}
         >
           Buy
         </button>
       </div>
+      {openStakeModal && (
+        <Modal>
+          {" "}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center space-x-4 w-full justify-between">
+              <h1 className="font-bold text-lg">
+                How much would you like to stake?
+              </h1>
+              <button
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                onClick={() => {
+                  setOpenStakeModal(false)
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <input
+              type="number"
+              className="input input-bordered"
+              value={stakingAmount}
+              onChange={(e) => setStakingAmount(parseInt(e.target.value))}
+            />
+            <button
+              className="btn btn-circle w-full btn-secondary mt-4"
+              onClick={async () => {
+                setOpenStakeModal(false)
+                const res = await stakeOnScript(
+                  provider,
+                  router.query.scriptId as string,
+                  stakingAmount
+                )
+                console.log({ res })
+              }}
+            >
+              Stake
+            </button>
+          </div>
+        </Modal>
+      )}
+      {openBuyModal && (
+        <Modal>
+          {" "}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center space-x-4 w-full justify-between">
+              <h1 className="font-bold text-lg">
+                Buy this script for {cost} tokens?
+              </h1>
+              <button
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                onClick={() => {
+                  setOpenBuyModal(false)
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <button
+              className="btn btn-circle w-full btn-secondary mt-4"
+              onClick={async () => {
+                const res = await buyArtifact(
+                  provider,
+                  router.query.scriptId as string,
+                  cost
+                )
+                console.log({ res })
+              }}
+            >
+              Buy
+            </button>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }
