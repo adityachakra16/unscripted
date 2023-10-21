@@ -6,7 +6,7 @@ export const CreatePageView: VFC = () => {
   return (
     <div>
       <Navbar />
-      <Editor disabled={false} />
+      <Editor readonly={false} />
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { sendRequest } from "../Request"
 import { getDb, scriptsTable } from "../Db"
 import { ethers } from "ethers"
 import {
+  Content,
   POLYGON_MUMBAI_LIQUID_STAKING_FACTORY_ADDRESS,
   Script,
   liquidStakingAbi,
@@ -63,10 +64,8 @@ export async function getScript(scriptId: string) {
 
 export async function createScript(
   title: string,
-  content: {
-    character: string
-    dialogue: string
-  }[],
+  content: Content[],
+  genres: string[],
   writer: string
 ) {
   return await sendRequest(`${process.env.NEXT_PUBLIC_API_HOST}/scripts`, {
@@ -77,6 +76,7 @@ export async function createScript(
     body: JSON.stringify({
       title,
       content,
+      genres,
       writer,
     }),
   })
@@ -84,10 +84,8 @@ export async function createScript(
 
 export async function updateScript(
   title: string,
-  content: {
-    character: string
-    dialogue: string
-  }[],
+  content: Content[],
+  genres: string[],
   writer: string
 ) {
   return await sendRequest(`${process.env.NEXT_PUBLIC_API_HOST}/scripts`, {
@@ -98,6 +96,7 @@ export async function updateScript(
     body: JSON.stringify({
       title,
       content,
+      genres,
       writer,
     }),
   })

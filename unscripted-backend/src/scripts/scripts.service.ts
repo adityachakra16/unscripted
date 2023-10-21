@@ -9,6 +9,7 @@ export class ScriptsService {
     return await this.tablelandService.createScript(
       createScriptDto.title,
       createScriptDto.content,
+      createScriptDto.genres,
       createScriptDto.writer,
     );
   }
@@ -26,6 +27,7 @@ export class ScriptsService {
       id,
       updateScriptDto.title,
       updateScriptDto.content,
+      updateScriptDto.genres,
       updateScriptDto.writer,
     );
   }

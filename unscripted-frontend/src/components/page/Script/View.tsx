@@ -1,9 +1,13 @@
+import { Editor } from "@/components/ui/Editor"
+import { Navbar } from "@/components/ui/Navbar"
+import { Script } from "@/components/ui/Script"
 import type { VFC } from "react"
 
 export const ScriptPageView: VFC = () => {
   return (
-    <main className="flex flex-col justify-center items-center p-4 h-screen">
-      <h1>Hello world!</h1>
-    </main>
+    <div>
+      <Navbar />
+      <Script />
+    </div>
   )
 }

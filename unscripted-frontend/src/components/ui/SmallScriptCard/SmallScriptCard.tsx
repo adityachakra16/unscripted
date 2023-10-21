@@ -16,15 +16,17 @@ export const SmallScriptCard: FC<SmallScriptCardProps> = ({ script }) => {
     >
       <div className="card-body">
         <h2 className="card-title">{script.title}</h2>
-        {script.genres?.map((genre) => {
-          return (
-            <div key={genre} className="badge badge-secondary">
-              {genre}
-            </div>
-          )
-        })}
+        <div className="flex flex-row gap-2">
+          {script.genres?.map((genre) => {
+            return (
+              <div key={genre} className="badge badge-secondary badge-outline">
+                {genre}
+              </div>
+            )
+          })}
+        </div>
 
-        {script.scene?.length && <p>{trim(script.scene[0], 30)}</p>}
+        {script.content?.length && <p>{trim(script.content[0].scene, 50)}</p>}
 
         {script.createdAt && (
           <div className="card-actions justify-end">
@@ -34,7 +36,7 @@ export const SmallScriptCard: FC<SmallScriptCardProps> = ({ script }) => {
           </div>
         )}
         <div className="card-actions justify-end">
-          <div className="badge badge-outline">
+          <div className="badge badge-secondary">
             {script.rating || 0} tokens staked
           </div>
         </div>
