@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
 import { ScriptsService } from './scripts.service';
 import { CreateScriptDto, UpdateScriptDto } from '@unscripted/shared-types';
 
@@ -32,10 +24,5 @@ export class ScriptsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateScriptDto: UpdateScriptDto) {
     return this.scriptsService.update(+id, updateScriptDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.scriptsService.remove(+id);
   }
 }

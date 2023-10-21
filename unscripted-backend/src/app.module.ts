@@ -11,6 +11,7 @@ import { TypegooseModule } from 'nestjs-typegoose';
 import { TablelandService } from './tableland/tableland.service';
 import { TablelandModule } from './tableland/tableland.module';
 import { ProvidersModule } from './providers/providers.module';
+import { TransactionModule } from './transaction/transaction.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ProvidersModule } from './providers/providers.module';
     AuthModule,
     TablelandModule,
     ProvidersModule,
+    TransactionModule,
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, TablelandService],

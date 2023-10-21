@@ -6,7 +6,7 @@ import { ProvidersService } from 'src/providers/providers.service';
 @Injectable()
 export class TablelandService {
   private readonly db;
-  private readonly scriptsTable = 'scripts_80001_7886';
+  private readonly scriptsTable = 'script_content_80001_7961';
   constructor(private readonly provider: ProvidersService) {
     const prov = this.provider.get();
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, prov);
@@ -48,10 +48,12 @@ export class TablelandService {
   ) {
     const tableName = this.scriptsTable;
     const id = this.generateId();
-
+    const contentString = JSON.stringify(content);
     const { meta: insert } = await this.db
-      .prepare(`INSERT INTO ${tableName} (id, title, writer) VALUES (?, ?, ?);`)
-      .bind(id, title, writer)
+      .prepare(
+        `INSERT INTO ${tableName} (id, title, content, writer) VALUES (?, ?, ?, ?);`,
+      )
+      .bind(id, title, contentString, writer)
       .run();
     console.log({ insert });
     const res = await insert.txn?.wait();
@@ -60,7 +62,7 @@ export class TablelandService {
   }
 
   async updateScript(
-    id: string,
+    id: number,
     title: string,
     content: {
       character: string;

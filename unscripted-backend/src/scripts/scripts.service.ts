@@ -8,13 +8,12 @@ export class ScriptsService {
   async create(createScriptDto: CreateScriptDto) {
     return await this.tablelandService.createScript(
       createScriptDto.title,
-      [],
+      createScriptDto.content,
       createScriptDto.writer,
     );
   }
 
   async findAll() {
-    console.log('findAll');
     return await this.tablelandService.getScripts();
   }
 
@@ -22,11 +21,12 @@ export class ScriptsService {
     return await this.tablelandService.getScriptById(id);
   }
 
-  update(id: number, updateScriptDto: UpdateScriptDto) {
-    return `This action updates a #${id} script`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} script`;
+  async update(id: number, updateScriptDto: UpdateScriptDto) {
+    return await this.tablelandService.updateScript(
+      id,
+      updateScriptDto.title,
+      updateScriptDto.content,
+      updateScriptDto.writer,
+    );
   }
 }
