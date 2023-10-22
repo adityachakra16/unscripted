@@ -12,7 +12,6 @@ export const TopViewContent: FC<TopViewContentProps> = () => {
   const { data: latestScripts } = useLatestScripts()
   const { data: highestRatedScripts } = useScriptsByHighestRating()
 
-  console.log({ latestScripts, highestRatedScripts })
   return (
     <div className="flex flex-row gap-24 justify-between p-16 px-48">
       <div className="flex flex-1 flex-col gap-2">

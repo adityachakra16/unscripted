@@ -91,7 +91,7 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
                     setClaiming(false)
                     setOpenClaimModal(false)
                   }}
-                  disabled={parseInt(claimableRewards) === 0}
+                  disabled={parseFloat(claimableRewards) === 0}
                 >
                   <div className="flex flex-row items-center">
                     {" "}
@@ -113,7 +113,7 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
                     setUnstaking(false)
                     setOpenClaimModal(false)
                   }}
-                  disabled={parseInt(totalStaked) === 0}
+                  disabled={parseFloat(totalStaked) === 0}
                 >
                   <div className="flex flex-row items-center">
                     {" "}

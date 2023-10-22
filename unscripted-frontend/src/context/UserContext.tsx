@@ -34,6 +34,8 @@ export function useProviderUserContext() {
   const [balance, setBalance] = React.useState<string>("0")
   const [claimableRewards, setClaimableRewards] = React.useState<string>("0")
 
+  console.log({ signInInfo })
+
   useEffect(() => {
     console.log("hey")
     if (!provider || !signInInfo) return

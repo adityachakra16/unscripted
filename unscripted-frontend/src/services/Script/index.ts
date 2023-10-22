@@ -226,6 +226,7 @@ export async function buyArtifact(
   const tx = liquidStakingContract.buyArtifact(amountInWei, {
     gasLimit: 1000000,
   })
+  console.log({ tx })
   await tx.wait()
 }
 
@@ -371,20 +372,41 @@ export async function totalClaimableRewards(
   return roundedTotalClaimableRewards
 }
 
-export async function claimAllRewards(provider: any, address: string) {
+export async function claimAllRewards(web3Provider: any, address: string) {
   const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
-    provider
+    web3Provider
   )
 
   const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
+  const promises = []
+  for (const lstContractAddress of lstContracts) {
+    try {
+      const provider = new ethers.providers.Web3Provider(web3Provider)
+      const signer = provider.getSigner()
 
-  for (const lstContract of lstContracts) {
-    const rewards = await getRewards(provider, lstContract, address)
-    if (rewards.eq(0)) {
-      continue
+      const lstContract = new ethers.Contract(
+        lstContractAddress,
+        liquidStakingAbi,
+        signer
+      )
+      const totalRewardPool = await lstContract.totalRewardPool()
+      const userStake = await lstContract.stakes(address)
+      const totalStaked = await lstContract.totalStaked()
+      console.log({ totalStaked })
+      const rewards = totalRewardPool.mul(userStake).div(totalStaked)
+      if (rewards.eq(0)) {
+        continue
+      }
+      promises.push(lstContract.claimReward())
+    } catch (e) {
+      console.log(e)
     }
-    await claimRewards(provider, lstContract)
+    console.log({ promises })
   }
+
+  const res = await Promise.all(promises)
+  console.log({ res })
+  return res
 }
 
 export async function unstakeAllTokens(provider: any, address: string) {
