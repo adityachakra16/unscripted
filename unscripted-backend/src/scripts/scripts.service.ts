@@ -47,6 +47,22 @@ export class ScriptsService {
     return roundedStakedInEther;
   }
 
+  async populateImages(script) {
+    try {
+      const res = await (
+        await fetch(
+          `${process.env.IMAGE_GENERATION_API}/data/${encodeURIComponent(
+            script.title,
+          )}`,
+        )
+      ).json();
+      return res.name;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
   async findAll(orderBy?: 'latest' | 'popular') {
     const scripts = await this.tablelandService.getScripts();
     try {
@@ -54,8 +70,9 @@ export class ScriptsService {
         scripts.map(async (script) => {
           const rating = await this.populateStakedAmount(script.id);
           const askingPrice = await this.populateAskingPrice(script.id);
+          const imageUri = await this.populateImages(script);
 
-          return { ...script, rating, askingPrice };
+          return { ...script, rating, askingPrice, imageUri };
         }),
       );
       if (orderBy === 'latest') {
@@ -82,8 +99,10 @@ export class ScriptsService {
     try {
       const rating = await this.populateStakedAmount(script.id);
       const askingPrice = await this.populateAskingPrice(script.id);
-      console.log({ rating, askingPrice });
-      return { ...script, rating, askingPrice };
+      const imageUri = await this.populateImages(script);
+
+      console.log({ rating, askingPrice, imageUri });
+      return { ...script, rating, askingPrice, imageUri };
     } catch (error) {
       console.log(error);
     }

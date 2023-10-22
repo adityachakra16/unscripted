@@ -15,9 +15,15 @@ export const ScriptCard: FC<ScriptCardProps> = ({ script }) => {
       className="card w-full bg-base-100 cursor-pointer hover:bg-base-200"
       onClick={() => router.push(`/script/${script.id}`)}
     >
-      <figure>
-        {script.image && <Image src={script.image} alt="script_img" />}
-      </figure>
+      {script.imageUri && (
+        <Image
+          src={script.imageUri}
+          alt="script_img"
+          width={800}
+          height={500}
+          className="rounded-t-lg"
+        />
+      )}
       <div className="card-body">
         <h2 className="card-title">{script.title}</h2>
         <div className="flex flex-row gap-2">

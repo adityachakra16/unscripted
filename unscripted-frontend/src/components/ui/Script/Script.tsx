@@ -12,6 +12,7 @@ import { FC, useEffect, useRef, useState } from "react"
 import Modal from "../Modal"
 import { Loader } from "../Loader"
 import { Onramp } from "../Onramp"
+import Image from "next/image"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ScriptProps {}
@@ -29,7 +30,7 @@ export const Script: FC<ScriptProps> = () => {
   const [stakingAmount, setStakingAmount] = useState(0)
   const [isOwner, setIsOwner] = useState(false)
   const [staking, setStaking] = useState(false)
-  const [buying, setBuying] = useState(false)
+  const [imageUri, setImageUri] = useState("")
 
   const contentRef = useRef<HTMLTextAreaElement>(null) // ref for the content textarea
 
@@ -77,6 +78,7 @@ export const Script: FC<ScriptProps> = () => {
         setGenres(scriptContent.genres)
         setRating(scriptContent.rating || 1)
         setCost(scriptContent.askingPrice || 0)
+        setImageUri(scriptContent.imageUri || "")
       })()
     }
   }, [router.query?.scriptId, provider])
@@ -90,6 +92,7 @@ export const Script: FC<ScriptProps> = () => {
 
   return (
     <div className="flex flex-col px-64  justify-start pt-8 h-full">
+      <Image src={imageUri} alt="img" width={100} height={100} />
       <textarea
         rows={2}
         id="scriptTitle"
