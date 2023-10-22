@@ -223,7 +223,7 @@ export async function buyArtifact(
     scriptId
   )
   const amountInWei = ethers.utils.parseUnits(amount.toString(), 18)
-  const tx = liquidStakingContract.buyArtifact(amountInWei, {
+  const tx = await liquidStakingContract.buyArtifact(amountInWei, {
     gasLimit: 1000000,
   })
   console.log({ tx })

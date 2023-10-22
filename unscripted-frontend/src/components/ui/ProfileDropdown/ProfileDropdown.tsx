@@ -5,13 +5,24 @@ import Image from "next/image"
 import { FC, useState } from "react"
 import { Loader } from "../Loader"
 import Modal from "../Modal"
+import { useRouter } from "next/router"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ProfileDropdownProps {}
 
 export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
-  const { user, signInInfo, provider, totalStaked, claimableRewards, balance } =
-    useUserContext()
+  const router = useRouter()
+  const {
+    user,
+    signInInfo,
+    provider,
+    totalStaked,
+    claimableRewards,
+    balance,
+    setUser,
+    setProvider,
+    setSignInInfo,
+  } = useUserContext()
   const [openClaimModal, setOpenClaimModal] = useState(false)
   const [unstaking, setUnstaking] = useState(false)
   const [claiming, setClaiming] = useState(false)
@@ -54,7 +65,15 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
             </div>
           </div>
         </li>
-        <li onClick={async () => await logout()}>
+        <li
+          onClick={async () => {
+            await logout()
+            setUser({})
+            setProvider(null)
+            setSignInInfo(null)
+            router.push("/")
+          }}
+        >
           <a>Logout</a>
         </li>
       </ul>

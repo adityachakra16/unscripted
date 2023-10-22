@@ -27,5 +27,4 @@ export async function logout() {
   const web3AuthModalPack = await getWeb3Modal()
   if (!web3AuthModalPack) return
   await web3AuthModalPack.signOut()
-  router.push("/")
 }

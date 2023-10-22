@@ -11,6 +11,7 @@ import { useRouter } from "next/router"
 import { FC, useEffect, useRef, useState } from "react"
 import Modal from "../Modal"
 import { Loader } from "../Loader"
+import { Onramp } from "../Onramp"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ScriptProps {}
@@ -220,44 +221,13 @@ export const Script: FC<ScriptProps> = () => {
         </Modal>
       )}
       {openBuyModal && (
-        <Modal>
-          {" "}
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-row items-center space-x-4 w-full justify-between">
-              <h1 className="font-bold text-lg">
-                Buy this script for {cost} ApeCoin?
-              </h1>
-              <button
-                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-                onClick={() => {
-                  setOpenBuyModal(false)
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <button
-              className="btn btn-circle w-full btn-secondary mt-4"
-              onClick={async () => {
-                setBuying(true)
-                const res = await buyArtifact(
-                  provider,
-                  router.query.scriptId as string,
-                  cost
-                )
-                await updateScriptOwner()
-                setBuying(false)
-                setOpenBuyModal(false)
-              }}
-            >
-              <div className="flex flex-row items-center">
-                {" "}
-                {buying && <Loader mode="dark" />}
-                <div className="ml-2">Buy</div>
-              </div>
-            </button>
-          </div>
-        </Modal>
+        <Onramp
+          handleClose={() => {
+            setOpenBuyModal(false)
+          }}
+          cost={cost}
+          updateScriptOwner={updateScriptOwner}
+        />
       )}
     </div>
   )
