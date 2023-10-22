@@ -11,6 +11,8 @@ const {
   FVM_URL,
   SCROLL_SEPOLIA_URL,
   POLYGON_ZKEVM_TESTNET_URL,
+  GOERLI_URL,
+  FVM_CALIBRATION_URL,
 } = process.env;
 
 module.exports = {
@@ -49,6 +51,14 @@ module.exports = {
     },
     fvm: {
       url: FVM_URL,
+      accounts: [`${PRIVATE_KEY}`],
+    },
+    fvmCalibration: {
+      url: FVM_CALIBRATION_URL,
+      accounts: [`${PRIVATE_KEY}`],
+    },
+    goerli: {
+      url: GOERLI_URL,
       accounts: [`${PRIVATE_KEY}`],
     },
   },
