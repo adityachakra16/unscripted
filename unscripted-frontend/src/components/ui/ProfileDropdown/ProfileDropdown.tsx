@@ -1,16 +1,20 @@
-import { FC, useState } from "react"
-import Image from "next/image"
-import { logout } from "@/services/Auth"
 import { useUserContext } from "@/context/UserContext"
+import { logout } from "@/services/Auth"
+import { claimAllRewards, unstakeAllTokens } from "@/services/Script"
+import Image from "next/image"
+import { FC, useState } from "react"
+import { Loader } from "../Loader"
 import Modal from "../Modal"
-import { claimRewards, unstakeFromScript } from "@/services/Script"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ProfileDropdownProps {}
 
 export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
-  const { user, signInInfo, provider } = useUserContext()
+  const { user, signInInfo, provider, totalStaked, claimableRewards, balance } =
+    useUserContext()
   const [openClaimModal, setOpenClaimModal] = useState(false)
+  const [unstaking, setUnstaking] = useState(false)
+  const [claiming, setClaiming] = useState(false)
 
   return (
     <div className="dropdown dropdown-end">
@@ -31,13 +35,18 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
         <li>
           <div className="flex flex-col items-start justify-start">
             <div className="">
-              Total Earned: <span className="font-bold">0</span>
+              Balance:{" "}
+              <span className="font-bold">{balance || "Not found"}</span>
             </div>
             <div className="">
-              Total Staked: <span className="font-bold">0</span>
+              Total Staked:{" "}
+              <span className="font-bold">{totalStaked || "Not found"}</span>
             </div>
             <div className="">
-              Unclaimed Rewards: <span className="font-bold">0</span>
+              Unclaimed Rewards:{" "}
+              <span className="font-bold">
+                {claimableRewards || "Not found"}
+              </span>
             </div>
           </div>
         </li>
@@ -63,29 +72,46 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
             </div>
             <div className="flex flex-row gap-4">
               <div className="flex flex-col gap-4">
-                <div className="font-bold text-lg">Total Earned: {}</div>
-                <div className="font-bold text-lg">Unclaimed Rewards: {}</div>
+                <div className="font-bold text-lg">Balance: {balance}</div>
+                <div className="font-bold text-lg">
+                  Unclaimed Rewards: {claimableRewards}
+                </div>
 
                 <button
                   className="btn btn-circle w-full btn-secondary mt-4"
                   onClick={async () => {
+                    setClaiming(true)
+                    await claimAllRewards(provider, signInInfo?.eoa)
+                    setClaiming(false)
                     setOpenClaimModal(false)
-                    await claimRewards(provider, signInInfo?.eoa, "")
                   }}
                 >
-                  Claim Rewards
+                  <div className="flex flex-row items-center">
+                    {" "}
+                    {claiming && <Loader mode="dark" />}
+                    <div className="ml-2">Claim Rewards</div>
+                  </div>
                 </button>
               </div>
               <div className="flex flex-col gap-4">
-                <div className="font-bold text-lg">Total Staked: {}</div>
+                <div className="font-bold text-lg">
+                  Total Staked: {totalStaked}
+                </div>
 
                 <button
                   className="btn btn-circle w-full btn-secondary mt-4"
                   onClick={async () => {
+                    setUnstaking(true)
+                    await unstakeAllTokens(provider, signInInfo?.eoa)
+                    setUnstaking(false)
                     setOpenClaimModal(false)
                   }}
                 >
-                  Unstake Tokens
+                  <div className="flex flex-row items-center">
+                    {" "}
+                    {unstaking && <Loader mode="dark" />}
+                    <div className="ml-2">Unstake Tokens</div>
+                  </div>
                 </button>
               </div>
             </div>

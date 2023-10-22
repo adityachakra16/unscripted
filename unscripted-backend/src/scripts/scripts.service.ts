@@ -30,8 +30,10 @@ export class ScriptsService {
     const stakedAmount = await this.transactionService.getStakedAmount(
       id.toString(),
     );
-    const bigNumberValue = ethers.BigNumber.from(stakedAmount);
-    return bigNumberValue.toString();
+    const stakedInEther = ethers.utils.formatUnits(stakedAmount, 'ether');
+    const roundedStakedInEther = parseFloat(stakedInEther).toFixed(2);
+
+    return roundedStakedInEther;
   }
 
   async findAll(orderBy?: 'latest' | 'popular') {

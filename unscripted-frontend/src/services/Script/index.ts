@@ -104,6 +104,18 @@ export async function updateScript(
   })
 }
 
+async function getLiquidStakingFactoryContract(web3Provider: any) {
+  const provider = new ethers.providers.Web3Provider(web3Provider)
+  const signer = provider.getSigner()
+  console.log({ signer })
+  const factory = new ethers.Contract(
+    POLYGON_MUMBAI_LIQUID_STAKING_FACTORY_ADDRESS,
+    liquidStakingFactoryAbi,
+    signer
+  )
+  return factory
+}
+
 async function getLiquidStakingContract(web3Provider: any, scriptId: string) {
   const provider = new ethers.providers.Web3Provider(web3Provider)
   const signer = provider.getSigner()
@@ -175,7 +187,10 @@ export async function stakeOnScript(
     provider,
     scriptId
   )
-  const tx = await liquidStakingContract.stake(amount, {
+
+  const amountInWei = ethers.utils.parseUnits(amount.toString(), 18)
+
+  const tx = await liquidStakingContract.stake(amountInWei, {
     gasLimit: 1000000,
   })
   console.log({ tx })
@@ -207,7 +222,10 @@ export async function buyArtifact(
     provider,
     scriptId
   )
-  const tx = liquidStakingContract.buyArtifact(amount)
+  const amountInWei = ethers.utils.parseUnits(amount.toString(), 18)
+  const tx = liquidStakingContract.buyArtifact(amountInWei, {
+    gasLimit: 1000000,
+  })
   await tx.wait()
 }
 
@@ -225,12 +243,18 @@ export async function getStakedAmount(
   scriptId: string,
   address: string
 ) {
-  const liquidStakingContract = await getLiquidStakingContract(
-    provider,
-    scriptId
-  )
-  const stakedAmount = await liquidStakingContract.stakes(address)
-  return stakedAmount
+  try {
+    const liquidStakingContract = await getLiquidStakingContract(
+      provider,
+      scriptId
+    )
+    console.log({ address })
+    const stakedAmount = await liquidStakingContract.stakes(address)
+    return stakedAmount
+  } catch (error) {
+    console.log(error)
+    return 0
+  }
 }
 
 export async function getRewards(
@@ -238,23 +262,111 @@ export async function getRewards(
   scriptId: string,
   address: string
 ) {
-  const liquidStakingContract = await getLiquidStakingContract(
-    provider,
-    scriptId
-  )
-  const totalRewardPool = await liquidStakingContract.totalRewardPool()
-  const userStake = await liquidStakingContract.stakes(address)
-  const totalStaked = await liquidStakingContract.totalStaked()
-  const rewards = totalRewardPool.mul(userStake).div(totalStaked)
-  return rewards
+  try {
+    const liquidStakingContract = await getLiquidStakingContract(
+      provider,
+      scriptId
+    )
+    console.log({ liquidStakingContract })
+    const totalRewardPool = await liquidStakingContract.totalRewardPool()
+    const userStake = await liquidStakingContract.stakes(address)
+    const totalStaked = await liquidStakingContract.totalStaked()
+    const rewards = totalRewardPool.mul(userStake).div(totalStaked)
+    return rewards
+  } catch (error) {
+    console.log(error)
+    return 0
+  }
 }
 
 export async function balanceOfRewardToken(
   provider: any,
-  scriptId: string,
   address: string
-) {
+): Promise<string> {
   const rewardToken = await getRewardTokenContract(provider)
+  const balance = await rewardToken.balanceOf(address)
+  const balanceInEther = ethers.utils.formatUnits(balance, "ether")
+  const roundedBalanceInEther = parseFloat(balanceInEther).toFixed(2)
 
-  return await rewardToken.balanceOf(address)
+  return roundedBalanceInEther
+}
+
+export async function getTotalStaked(
+  provider: any,
+  address: string
+): Promise<string> {
+  const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
+    provider
+  )
+  const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
+
+  let totalStaked = ethers.BigNumber.from(0)
+  for (const lstContract of lstContracts) {
+    const stakedAmount = await getStakedAmount(provider, lstContract, address)
+    totalStaked = totalStaked.add(stakedAmount)
+  }
+
+  const totalStakedInEther = ethers.utils.formatUnits(totalStaked, "ether")
+  const roundedTotalStakedInEther = parseFloat(totalStakedInEther).toFixed(2)
+
+  return roundedTotalStakedInEther
+}
+
+export async function totalClaimableRewards(
+  provider: any,
+  address: string
+): Promise<string> {
+  const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
+    provider
+  )
+
+  const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
+
+  let totalClaimableRewards = ethers.BigNumber.from(0)
+  for (const lstContract of lstContracts) {
+    const rewards = await getRewards(provider, lstContract, address)
+    totalClaimableRewards = totalClaimableRewards.add(rewards)
+  }
+
+  const totalClaimableRewardsInEther = ethers.utils.formatUnits(
+    totalClaimableRewards,
+    "ether"
+  )
+  const roundedTotalClaimableRewards = parseFloat(
+    totalClaimableRewardsInEther
+  ).toFixed(2)
+
+  return roundedTotalClaimableRewards
+}
+
+export async function claimAllRewards(provider: any, address: string) {
+  const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
+    provider
+  )
+
+  const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
+
+  for (const lstContract of lstContracts) {
+    const rewards = await getRewards(provider, lstContract, address)
+    if (rewards.eq(0)) {
+      continue
+    }
+    await claimRewards(provider, lstContract)
+  }
+}
+
+export async function unstakeAllTokens(provider: any, address: string) {
+  const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
+    provider
+  )
+
+  const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
+
+  for (const lstContract of lstContracts) {
+    const stakedAmount = await getStakedAmount(provider, lstContract, address)
+    if (stakedAmount.eq(0)) {
+      continue
+    }
+    await unstakeFromScript(provider, lstContract, address)
+  }
 }
