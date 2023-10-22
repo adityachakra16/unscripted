@@ -21,7 +21,6 @@ export class ScriptsController {
 
   @Get()
   findAll(@Query('orderBy') orderBy: 'latest' | 'popular') {
-    console.log({ orderBy });
     return this.scriptsService.findAll(orderBy);
   }
 

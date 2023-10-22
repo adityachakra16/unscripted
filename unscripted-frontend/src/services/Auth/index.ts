@@ -1,6 +1,7 @@
 import router from "next/router"
 import { sendRequest } from "../Request"
 import { AuthKitSignInData } from "@safe-global/auth-kit"
+import { getWeb3Modal } from "../Web3Modal"
 
 export async function login(
   token: string,
@@ -22,8 +23,9 @@ export async function login(
   })
 }
 
-export function logout() {
-  localStorage.removeItem("accessToken")
-  localStorage.removeItem("refreshToken")
-  router.push("/login")
+export async function logout() {
+  const web3AuthModalPack = await getWeb3Modal()
+  if (!web3AuthModalPack) return
+  await web3AuthModalPack.signOut()
+  router.push("/")
 }

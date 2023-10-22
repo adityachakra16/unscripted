@@ -12,6 +12,7 @@ contract LiquidStaking {
     uint256 public artifactId;
     uint256 public totalStaked;
     uint256 public totalRewardPool;
+    uint256 public askingPrice;
 
     mapping(address => uint256) public stakes;
     mapping(address => uint256) public pendingRewards;
@@ -21,12 +22,13 @@ contract LiquidStaking {
     event ArtifactPurchased(address indexed buyer, uint256 price);
     event RewardClaimed(address indexed staker, uint256 amount);
 
-    constructor(address _stakingToken, address _rewardToken, address _artifactCreator, uint256 _artifactId) {
+    constructor(address _stakingToken, address _rewardToken, address _artifactCreator, uint256 _artifactId, uint256 _askingPrice) {
         stakingToken = IERC20(_stakingToken);
         rewardToken = StakingToken(_rewardToken);
         artifactCreator = _artifactCreator;
         artifactId = _artifactId;
         artifactOwner = _artifactCreator;
+        askingPrice = _askingPrice;
     }
 
     function stake(uint256 amount) external {
@@ -55,6 +57,7 @@ contract LiquidStaking {
 
     function buyArtifact(uint256 price) external {
         require(stakingToken.transferFrom(msg.sender, address(this), price), "Purchase failed");
+        require(price >= askingPrice, "Price must be greater than or equal to asking price");
 
         // Distribute funds
         uint256 creatorShare = (price * 10) / 100;
@@ -80,5 +83,10 @@ contract LiquidStaking {
 
         require(stakingToken.transfer(msg.sender, reward), "Reward transfer failed");
         emit RewardClaimed(msg.sender, reward);
+    }
+
+    function updateAskingPrice(uint256 newAskingPrice) external {
+        require(msg.sender == artifactOwner, "Only the artifact owner can update the asking price");
+        askingPrice = newAskingPrice;
     }
 }

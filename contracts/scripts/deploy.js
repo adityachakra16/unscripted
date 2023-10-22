@@ -13,6 +13,9 @@ async function main() {
   const LiquidStakingFactory = await hre.ethers.getContractFactory(
     "LiquidStakingFactory"
   );
+
+  // For using ApeCoin, remove demotoken.address and replace with ApeCoin address - 0x328507DC29C95c170B56a1b3A758eB7a9E73455c on Goerlu, 0x4d224452801ACEd8B2F0aebE155379bb5D594381 on Mainnet
+
   const liquidStakingFactory = await LiquidStakingFactory.deploy(
     demoToken.address
   );

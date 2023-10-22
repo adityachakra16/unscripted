@@ -5,6 +5,7 @@ import { FC, useEffect, useRef, useState } from "react"
 import Modal from "../Modal"
 import { Content } from "@unscripted/shared-types"
 import { GENRE_OPTIONS } from "@/services/Utils"
+import { Loader } from "../Loader"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface EditorProps {}
@@ -32,6 +33,9 @@ export const Editor: FC<EditorProps> = () => {
   const [newCharacter, setNewCharacter] = useState("" as string)
   const [genres, setGenres] = useState([] as string[])
   const contentRef = useRef<HTMLTextAreaElement>(null) // ref for the content textarea
+  const [openPublishModal, setOpenPublishModal] = useState(false)
+  const [askingPrice, setAskingPrice] = useState(0)
+  const [publishing, setPublishing] = useState(false)
 
   useEffect(() => {
     const handleInput = () => {
@@ -60,8 +64,8 @@ export const Editor: FC<EditorProps> = () => {
       <div className="flex items-center space-x-4 w-full justify-end mb-8">
         <button
           className="btn btn-circle btn-primary w-36 md:p-4 "
-          onClick={async () => {
-            await createScript(title, content, genres, signInInfo.eoa)
+          onClick={() => {
+            setOpenPublishModal(true)
           }}
         >
           Publish
@@ -269,6 +273,58 @@ export const Editor: FC<EditorProps> = () => {
               }}
             >
               Save
+            </button>
+          </div>
+        </Modal>
+      )}
+      {openPublishModal && (
+        <Modal>
+          {" "}
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-row items-center space-x-4 w-full justify-between">
+              <h1 className="font-bold text-lg">
+                Please set an asking price for your script
+              </h1>
+              <button
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                onClick={() => {
+                  setOpenPublishModal(false)
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex flex-row items-center space-x-4 w-full">
+              <input
+                type="number"
+                className="input input-bordered"
+                value={askingPrice}
+                onChange={(e) => setAskingPrice(parseInt(e.target.value))}
+              />
+              <div className="font-bold text-lg">ApeCoin</div>
+            </div>
+            <button
+              className="btn btn-circle w-full btn-secondary mt-4"
+              onClick={async () => {
+                setPublishing(true)
+                await createScript(
+                  title,
+                  content,
+                  genres,
+                  signInInfo.eoa,
+                  askingPrice
+                )
+
+                setPublishing(false)
+                setOpenPublishModal(false)
+                router.push("/")
+              }}
+            >
+              <div className="flex flex-row items-center">
+                {" "}
+                {publishing && <Loader mode="dark" />}
+                <div className="ml-2">Publish</div>
+              </div>
             </button>
           </div>
         </Modal>

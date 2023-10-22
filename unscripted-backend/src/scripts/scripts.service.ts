@@ -21,9 +21,20 @@ export class ScriptsService {
       createScriptDto.writer,
       artifactId,
       createScriptDto.title,
+      createScriptDto.askingPrice,
     );
     console.log({ tx });
     return tx;
+  }
+
+  async populateAskingPrice(id: number) {
+    const askingPrice = await this.transactionService.askingPrice(
+      id.toString(),
+    );
+    const askingPriceInEther = ethers.utils.formatUnits(askingPrice, 'ether');
+    const roundedAskingPriceInEther = parseFloat(askingPriceInEther).toFixed(2);
+
+    return roundedAskingPriceInEther;
   }
 
   async populateStakedAmount(id: number) {
@@ -42,7 +53,9 @@ export class ScriptsService {
       const populatedScripts = await Promise.all(
         scripts.map(async (script) => {
           const rating = await this.populateStakedAmount(script.id);
-          return { ...script, rating };
+          const askingPrice = await this.populateAskingPrice(script.id);
+
+          return { ...script, rating, askingPrice };
         }),
       );
       if (orderBy === 'latest') {
@@ -68,8 +81,9 @@ export class ScriptsService {
 
     try {
       const rating = await this.populateStakedAmount(script.id);
-      console.log({ rating });
-      return { ...script, rating };
+      const askingPrice = await this.populateAskingPrice(script.id);
+      console.log({ rating, askingPrice });
+      return { ...script, rating, askingPrice };
     } catch (error) {
       console.log(error);
     }

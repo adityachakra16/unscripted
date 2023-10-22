@@ -37,7 +37,7 @@ export const SmallScriptCard: FC<SmallScriptCardProps> = ({ script }) => {
         )}
         <div className="card-actions justify-end">
           <div className="badge badge-secondary">
-            {script.rating || 0} tokens staked
+            {script.rating || 0} ApeCoin staked
           </div>
         </div>
       </div>

@@ -22,15 +22,17 @@ export class TransactionService {
       liquidStakingFactoryAbi,
       signer,
     );
+
+    console.log({
+      liquidStakingFactoryContract: this.liquidStakingFactoryContract,
+    });
   }
 
   async getLiquidStakingContract(scriptId: string) {
-    console.log({ scriptId });
     const contractAddres =
       await this.liquidStakingFactoryContract.artifactIdToStaking(
         scriptId.toString(),
       );
-    console.log({ contractAddres });
     const signer = new ethers.Wallet(process.env.PRIVATE_KEY, this.provider);
 
     return new ethers.Contract(contractAddres, liquidStakingAbi, signer);
@@ -40,21 +42,22 @@ export class TransactionService {
     writerAddress: string,
     scriptId: string,
     scriptTitle: string,
+    askingPrice: string,
   ) {
     const tokenName = scriptTitle
       .split(/\s/)
       .reduce((response, word) => (response += word.slice(0, 1)), '');
     const tokenSymbol = tokenName.toUpperCase().slice(0, 3);
+    console.log({ askingPrice });
 
-    console.log({
-      lfs: this.liquidStakingFactoryContract,
-    });
     const tx = await this.liquidStakingFactoryContract.createLiquidStaking(
       writerAddress,
       scriptId,
       tokenName,
       tokenSymbol,
+      askingPrice,
     );
+    console.log({ tx });
     return tx;
   }
 
@@ -83,7 +86,6 @@ export class TransactionService {
   }
 
   async getStakedAmount(scriptId: string) {
-    console.log('qwert');
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
     try {
       const stakedAmount = await this.liquidStakingContract.totalStaked();
@@ -97,10 +99,29 @@ export class TransactionService {
   }
 
   async getRewards(scriptId: string, userAddress: string) {
-    this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
-    const totalRewardPool = await this.liquidStakingContract.totalRewardPool();
-    const userStake = await this.liquidStakingContract.stakes(userAddress);
-    const totalStaked = await this.liquidStakingContract.totalStaked();
-    return userStake.mul(totalRewardPool).div(totalStaked);
+    try {
+      this.liquidStakingContract =
+        await this.getLiquidStakingContract(scriptId);
+      const totalRewardPool =
+        await this.liquidStakingContract.totalRewardPool();
+      const userStake = await this.liquidStakingContract.stakes(userAddress);
+      const totalStaked = await this.liquidStakingContract.totalStaked();
+      return userStake.mul(totalRewardPool).div(totalStaked);
+    } catch (error) {
+      console.log(error);
+      return 0;
+    }
+  }
+
+  async askingPrice(scriptId: string) {
+    try {
+      this.liquidStakingContract =
+        await this.getLiquidStakingContract(scriptId);
+      const askingPrice = await this.liquidStakingContract.askingPrice();
+      return askingPrice;
+    } catch (error) {
+      console.log(error);
+      return 0;
+    }
   }
 }

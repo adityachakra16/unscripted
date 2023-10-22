@@ -16,7 +16,7 @@ contract LiquidStakingFactory {
         baseToken = IERC20(_baseToken);
     }
 
-    function createLiquidStaking(address artifactCreator, uint256 artifactId, string memory stakingTokenName, string memory stakingTokenSymbol) external returns (address) {
+    function createLiquidStaking(address artifactCreator, uint256 artifactId, string memory stakingTokenName, string memory stakingTokenSymbol, uint256 askingPrice) external returns (address) {
         require(artifactIdToStaking[artifactId] == address(0), "Artifact ID already used");
 
         StakingToken newRewardToken = new StakingToken(stakingTokenName, stakingTokenSymbol);
@@ -24,7 +24,8 @@ contract LiquidStakingFactory {
             address(baseToken),
             address(newRewardToken),
             artifactCreator,
-            artifactId
+            artifactId,
+            askingPrice
         );
 
         liquidStakings.push(address(newLiquidStaking));

@@ -75,7 +75,7 @@ export const Script: FC<ScriptProps> = () => {
         setContent(scriptContent.content)
         setGenres(scriptContent.genres)
         setRating(scriptContent.rating || 1)
-        setCost(scriptContent.cost || 0)
+        setCost(scriptContent.askingPrice || 0)
       })()
     }
   }, [router.query?.scriptId, provider])
@@ -115,7 +115,7 @@ export const Script: FC<ScriptProps> = () => {
           <div className="flex flex-row items-center space-x-4 w-full justify-end">
             {
               <div className="badge badge-secondary">
-                {rating} staked tokens
+                {rating} staked ApeCoin
               </div>
             }
           </div>
@@ -158,12 +158,12 @@ export const Script: FC<ScriptProps> = () => {
             Stake
           </button>
           <button
-            className="btn btn-circle btn-outline w-36 md:p-4 "
+            className="btn btn-circle btn-outline btn-success w-48 md:p-4 "
             onClick={() => {
               setOpenBuyModal(true)
             }}
           >
-            Buy
+            Buy for {cost} ApeCoin
           </button>
         </div>
       )}
@@ -184,12 +184,15 @@ export const Script: FC<ScriptProps> = () => {
                 ✕
               </button>
             </div>
-            <input
-              type="number"
-              className="input input-bordered"
-              value={stakingAmount}
-              onChange={(e) => setStakingAmount(parseInt(e.target.value))}
-            />
+            <div className="flex flex-row items-center space-x-4 w-full">
+              <input
+                type="number"
+                className="input input-bordered"
+                value={stakingAmount}
+                onChange={(e) => setStakingAmount(parseInt(e.target.value))}
+              />
+              <div className="font-bold text-lg">ApeCoin</div>
+            </div>
             <button
               className="btn btn-circle w-full btn-secondary mt-4"
               onClick={async () => {
@@ -199,16 +202,10 @@ export const Script: FC<ScriptProps> = () => {
                   router.query.scriptId as string,
                   stakingAmount
                 )
-                const stakedAmount = await getStakedAmount(
-                  provider,
-                  router.query.scriptId as string,
-                  signInInfo?.eoa
-                )
-
-                console.log({ stakedAmount })
 
                 setStaking(false)
                 setOpenStakeModal(false)
+                setRating(stakingAmount)
 
                 console.log({ res })
               }}
@@ -228,7 +225,7 @@ export const Script: FC<ScriptProps> = () => {
           <div className="flex flex-col gap-4">
             <div className="flex flex-row items-center space-x-4 w-full justify-between">
               <h1 className="font-bold text-lg">
-                Buy this script for {cost} tokens?
+                Buy this script for {cost} ApeCoin?
               </h1>
               <button
                 className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"

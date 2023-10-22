@@ -32,25 +32,29 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
         tabIndex={0}
         className="menu-sm dropdown-content menu rounded-box z-[1] mt-3 w-52 bg-base-100 p-2 shadow"
       >
-        <li>
+        <li onClick={() => setOpenClaimModal(true)}>
           <div className="flex flex-col items-start justify-start">
             <div className="">
               Balance:{" "}
-              <span className="font-bold">{balance || "Not found"}</span>
+              <span className="font-bold">
+                {balance || "Not found"} ApeCoin
+              </span>
             </div>
             <div className="">
               Total Staked:{" "}
-              <span className="font-bold">{totalStaked || "Not found"}</span>
+              <span className="font-bold">
+                {totalStaked || "Not found"} ApeCoin
+              </span>
             </div>
             <div className="">
               Unclaimed Rewards:{" "}
               <span className="font-bold">
-                {claimableRewards || "Not found"}
+                {claimableRewards || "Not found"} ApeCoin
               </span>
             </div>
           </div>
         </li>
-        <li onClick={() => logout()}>
+        <li onClick={async () => await logout()}>
           <a>Logout</a>
         </li>
       </ul>
@@ -70,11 +74,13 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
                 ✕
               </button>
             </div>
-            <div className="flex flex-row gap-4">
-              <div className="flex flex-col gap-4">
-                <div className="font-bold text-lg">Balance: {balance}</div>
+            <div className="flex flex-row gap-16">
+              <div className="flex flex-col gap-4 w-1/2">
                 <div className="font-bold text-lg">
-                  Unclaimed Rewards: {claimableRewards}
+                  Balance: {balance} ApeCoin
+                </div>
+                <div className="font-bold text-lg">
+                  Unclaimed Rewards: {claimableRewards} ApeCoin
                 </div>
 
                 <button
@@ -85,6 +91,7 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
                     setClaiming(false)
                     setOpenClaimModal(false)
                   }}
+                  disabled={parseInt(claimableRewards) === 0}
                 >
                   <div className="flex flex-row items-center">
                     {" "}
@@ -93,9 +100,9 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
                   </div>
                 </button>
               </div>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 w-1/2 justify-between">
                 <div className="font-bold text-lg">
-                  Total Staked: {totalStaked}
+                  Total Staked: {totalStaked} ApeCoin
                 </div>
 
                 <button
@@ -106,6 +113,7 @@ export const ProfileDropdown: FC<ProfileDropdownProps> = () => {
                     setUnstaking(false)
                     setOpenClaimModal(false)
                   }}
+                  disabled={parseInt(totalStaked) === 0}
                 >
                   <div className="flex flex-row items-center">
                     {" "}

@@ -53,7 +53,7 @@ export async function getScriptsByUser(userId: string) {
   )
 }
 
-export async function getScript(scriptId: string) {
+export async function getScript(scriptId: string): Promise<Script> {
   return await sendRequest(
     `${process.env.NEXT_PUBLIC_API_HOST}/scripts/${scriptId}`,
     {
@@ -68,8 +68,10 @@ export async function createScript(
   title: string,
   content: Content[],
   genres: string[],
-  writer: string
+  writer: string,
+  askingPrice: number
 ) {
+  const askingPriceInWei = ethers.utils.parseUnits(askingPrice.toString(), 18)
   return await sendRequest(`${process.env.NEXT_PUBLIC_API_HOST}/scripts`, {
     method: "POST",
     headers: {
@@ -80,6 +82,7 @@ export async function createScript(
       content,
       genres,
       writer,
+      askingPrice: askingPriceInWei.toString(),
     }),
   })
 }
@@ -107,7 +110,6 @@ export async function updateScript(
 async function getLiquidStakingFactoryContract(web3Provider: any) {
   const provider = new ethers.providers.Web3Provider(web3Provider)
   const signer = provider.getSigner()
-  console.log({ signer })
   const factory = new ethers.Contract(
     POLYGON_MUMBAI_LIQUID_STAKING_FACTORY_ADDRESS,
     liquidStakingFactoryAbi,
@@ -119,14 +121,12 @@ async function getLiquidStakingFactoryContract(web3Provider: any) {
 async function getLiquidStakingContract(web3Provider: any, scriptId: string) {
   const provider = new ethers.providers.Web3Provider(web3Provider)
   const signer = provider.getSigner()
-  console.log({ signer })
   const factory = new ethers.Contract(
     POLYGON_MUMBAI_LIQUID_STAKING_FACTORY_ADDRESS,
     liquidStakingFactoryAbi,
     signer
   )
 
-  console.log({ factory })
   const liquidStakingAddress = await factory.artifactIdToStaking(scriptId)
   return new ethers.Contract(liquidStakingAddress, liquidStakingAbi, signer)
 }
@@ -244,13 +244,15 @@ export async function getStakedAmount(
   address: string
 ) {
   try {
+    console.log({ scriptId })
     const liquidStakingContract = await getLiquidStakingContract(
       provider,
       scriptId
     )
-    console.log({ address })
+    console.log({ liquidStakingContract, address })
     const stakedAmount = await liquidStakingContract.stakes(address)
-    return stakedAmount
+    console.log({ stakedAmount })
+    return stakedAmount.div(ethers.BigNumber.from(10).pow(18))
   } catch (error) {
     console.log(error)
     return 0
@@ -292,19 +294,33 @@ export async function balanceOfRewardToken(
 }
 
 export async function getTotalStaked(
-  provider: any,
+  web3Provider: any,
   address: string
 ): Promise<string> {
   const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
-    provider
+    web3Provider
   )
-  const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
+  const lstContractAddresses =
+    await liquidStakingContractFactory.getLiquidStakings()
 
   let totalStaked = ethers.BigNumber.from(0)
-  for (const lstContract of lstContracts) {
-    const stakedAmount = await getStakedAmount(provider, lstContract, address)
-    totalStaked = totalStaked.add(stakedAmount)
+  for (const lstContractAddress of lstContractAddresses) {
+    try {
+      const provider = new ethers.providers.Web3Provider(web3Provider)
+      const signer = provider.getSigner()
+
+      const lstContract = new ethers.Contract(
+        lstContractAddress,
+        liquidStakingAbi,
+        signer
+      )
+      const stakedAmount = await lstContract.stakes(address)
+      totalStaked = totalStaked.add(stakedAmount)
+    } catch (e) {
+      console.log(e)
+    }
   }
+  console.log({ totalStaked })
 
   const totalStakedInEther = ethers.utils.formatUnits(totalStaked, "ether")
   const roundedTotalStakedInEther = parseFloat(totalStakedInEther).toFixed(2)
@@ -313,19 +329,35 @@ export async function getTotalStaked(
 }
 
 export async function totalClaimableRewards(
-  provider: any,
+  web3Provider: any,
   address: string
 ): Promise<string> {
   const liquidStakingContractFactory = await getLiquidStakingFactoryContract(
-    provider
+    web3Provider
   )
 
   const lstContracts = await liquidStakingContractFactory.getLiquidStakings()
 
   let totalClaimableRewards = ethers.BigNumber.from(0)
-  for (const lstContract of lstContracts) {
-    const rewards = await getRewards(provider, lstContract, address)
-    totalClaimableRewards = totalClaimableRewards.add(rewards)
+  for (const lstContractAddress of lstContracts) {
+    try {
+      const provider = new ethers.providers.Web3Provider(web3Provider)
+      const signer = provider.getSigner()
+
+      const lstContract = new ethers.Contract(
+        lstContractAddress,
+        liquidStakingAbi,
+        signer
+      )
+      const totalRewardPool = await lstContract.totalRewardPool()
+      const userStake = await lstContract.stakes(address)
+      const totalStaked = await lstContract.totalStaked()
+      console.log({ totalStaked })
+      const rewards = totalRewardPool.mul(userStake).div(totalStaked)
+      totalClaimableRewards = totalClaimableRewards.add(rewards)
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   const totalClaimableRewardsInEther = ethers.utils.formatUnits(
