@@ -29,7 +29,7 @@ export function useLatestScripts() {
 
 export async function getScriptsByHighestRating(): Promise<Script[]> {
   return await sendRequest(
-    `${process.env.NEXT_PUBLIC_API_HOST}/scripts?orderBy=rating`,
+    `${process.env.NEXT_PUBLIC_API_HOST}/scripts?orderBy=popular`,
     {
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ScriptsService } from './scripts.service';
 import { CreateScriptDto, UpdateScriptDto } from '@unscripted/shared-types';
 
@@ -12,8 +20,9 @@ export class ScriptsController {
   }
 
   @Get()
-  findAll() {
-    return this.scriptsService.findAll();
+  findAll(@Query('orderBy') orderBy: 'latest' | 'popular') {
+    console.log({ orderBy });
+    return this.scriptsService.findAll(orderBy);
   }
 
   @Get(':id')

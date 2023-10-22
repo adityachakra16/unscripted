@@ -27,12 +27,14 @@ export class ScriptsService {
   }
 
   async populateStakedAmount(id: number) {
-    const stakedAmount = await this.transactionService.getStakedAmount(id);
+    const stakedAmount = await this.transactionService.getStakedAmount(
+      id.toString(),
+    );
     const bigNumberValue = ethers.BigNumber.from(stakedAmount);
     return bigNumberValue.toString();
   }
 
-  async findAll() {
+  async findAll(orderBy?: 'latest' | 'popular') {
     const scripts = await this.tablelandService.getScripts();
     try {
       const populatedScripts = await Promise.all(
@@ -41,6 +43,17 @@ export class ScriptsService {
           return { ...script, rating };
         }),
       );
+      if (orderBy === 'latest') {
+        return populatedScripts.sort((a, b) => {
+          return b.createdAt - a.createdAt;
+        });
+      }
+      if (orderBy === 'popular') {
+        return populatedScripts.sort((a, b) => {
+          return b.rating - a.rating;
+        });
+      }
+
       return populatedScripts;
     } catch (error) {
       console.log(error);

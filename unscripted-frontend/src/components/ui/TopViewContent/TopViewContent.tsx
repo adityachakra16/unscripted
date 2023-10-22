@@ -3,6 +3,7 @@ import { ScriptCard } from "../ScriptCard"
 import { useLatestScripts, useScriptsByHighestRating } from "@/services/Script"
 import { Script } from "@unscripted/shared-types"
 import { SmallScriptCard } from "../SmallScriptCard"
+import { Loader } from "../Loader"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface TopViewContentProps {}
@@ -16,6 +17,11 @@ export const TopViewContent: FC<TopViewContentProps> = () => {
     <div className="flex flex-row gap-24 justify-between p-16 px-48">
       <div className="flex flex-1 flex-col gap-2">
         <div className="font-bold text-2xl">Latest</div>
+        {!latestScripts && (
+          <div className="flex flex-col px-64  justify-start pt-8 h-full">
+            <Loader mode="light" />
+          </div>
+        )}
         {latestScripts &&
           latestScripts.map((script: Script) => {
             return <ScriptCard key={script.id} script={script} />
@@ -25,6 +31,11 @@ export const TopViewContent: FC<TopViewContentProps> = () => {
 
       <div className="flex flex-col gap-2">
         <div className="font-bold text-2xl">Community Picks</div>
+        {!highestRatedScripts && (
+          <div className="flex flex-col px-64  justify-start pt-8 h-full">
+            <Loader mode="light" />
+          </div>
+        )}
         {highestRatedScripts &&
           highestRatedScripts.map((script: Script) => {
             return <SmallScriptCard key={script.id} script={script} />

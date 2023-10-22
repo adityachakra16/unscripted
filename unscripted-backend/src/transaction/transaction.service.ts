@@ -24,7 +24,7 @@ export class TransactionService {
     );
   }
 
-  async getLiquidStakingContract(scriptId: number) {
+  async getLiquidStakingContract(scriptId: string) {
     console.log({ scriptId });
     const contractAddres =
       await this.liquidStakingFactoryContract.artifactIdToStaking(
@@ -58,41 +58,45 @@ export class TransactionService {
     return tx;
   }
 
-  async stake(scriptId: number, amount: string) {
+  async stake(scriptId: string, amount: string) {
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
     const tx = await this.liquidStakingContract.stake(amount);
     return tx;
   }
 
-  async unstake(scriptId: number, amount: string) {
+  async unstake(scriptId: string, amount: string) {
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
     const tx = await this.liquidStakingContract.unstake(amount);
     return tx;
   }
 
-  async buy(scriptId: number, amount: string) {
+  async buy(scriptId: string, amount: string) {
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
     const tx = await this.liquidStakingContract.buyArtifact(amount);
     return tx;
   }
 
-  async claimRewards(scriptId: number) {
+  async claimRewards(scriptId: string) {
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
     const tx = await this.liquidStakingContract.claimRewards();
     return tx;
   }
 
-  async getStakedAmount(scriptId: number) {
+  async getStakedAmount(scriptId: string) {
     console.log('qwert');
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
+    try {
+      const stakedAmount = await this.liquidStakingContract.totalStaked();
+      console.log({ stakedAmount });
 
-    const stakedAmount = await this.liquidStakingContract.totalStaked();
-    console.log({ stakedAmount });
-
-    return stakedAmount;
+      return stakedAmount;
+    } catch (error) {
+      console.log(error);
+      return 0;
+    }
   }
 
-  async getRewards(scriptId: number, userAddress: string) {
+  async getRewards(scriptId: string, userAddress: string) {
     this.liquidStakingContract = await this.getLiquidStakingContract(scriptId);
     const totalRewardPool = await this.liquidStakingContract.totalRewardPool();
     const userStake = await this.liquidStakingContract.stakes(userAddress);
