@@ -5,7 +5,9 @@ import { ethers } from "ethers"
 import {
   Content,
   POLYGON_MUMBAI_LIQUID_STAKING_FACTORY_ADDRESS,
+  POLYGON_MUMBAI_LIQUID_STAKING_TOKEN_ADDRESS,
   Script,
+  erc20Abi,
   liquidStakingAbi,
   liquidStakingFactoryAbi,
 } from "@unscripted/shared-types"
@@ -103,9 +105,7 @@ export async function updateScript(
 }
 
 async function getLiquidStakingContract(web3Provider: any, scriptId: string) {
-  console.log({ web3Provider })
   const provider = new ethers.providers.Web3Provider(web3Provider)
-  console.log({ provider })
   const signer = provider.getSigner()
   console.log({ signer })
   const factory = new ethers.Contract(
@@ -119,6 +119,47 @@ async function getLiquidStakingContract(web3Provider: any, scriptId: string) {
   return new ethers.Contract(liquidStakingAddress, liquidStakingAbi, signer)
 }
 
+async function getRewardTokenContract(web3Provider: any) {
+  const provider = new ethers.providers.Web3Provider(web3Provider)
+  const signer = provider.getSigner()
+
+  return new ethers.Contract(
+    POLYGON_MUMBAI_LIQUID_STAKING_TOKEN_ADDRESS,
+    erc20Abi,
+    signer
+  )
+}
+
+export async function approveToken(provider: any, scriptId: string) {
+  const liquidStakingContract = await getLiquidStakingContract(
+    provider,
+    scriptId
+  )
+  console.log({
+    address: liquidStakingContract.address,
+  })
+  const rewardToken = await getRewardTokenContract(provider)
+  console.log({ add: rewardToken.address })
+  const tx = await rewardToken.approve(
+    liquidStakingContract.address,
+    ethers.constants.MaxUint256
+  )
+  console.log({ tx })
+  await tx.wait()
+}
+
+export async function getScriptOwner(
+  provider: any,
+  scriptId: string
+): Promise<string> {
+  const liquidStakingContract = await getLiquidStakingContract(
+    provider,
+    scriptId
+  )
+  const owner = await liquidStakingContract.artifactOwner()
+  return owner
+}
+
 export async function stakeOnScript(
   provider: any,
   scriptId: string,
@@ -128,6 +169,8 @@ export async function stakeOnScript(
     scriptId,
     amount,
   })
+  const approveTx = await approveToken(provider, scriptId)
+  console.log({ approveTx })
   const liquidStakingContract = await getLiquidStakingContract(
     provider,
     scriptId
@@ -142,13 +185,14 @@ export async function stakeOnScript(
 export async function unstakeFromScript(
   provider: any,
   scriptId: string,
-  amount: number
+  address: string
 ) {
+  const stakedAmount = await getStakedAmount(provider, scriptId, address)
   const liquidStakingContract = await getLiquidStakingContract(
     provider,
     scriptId
   )
-  const tx = liquidStakingContract.unstake(amount)
+  const tx = liquidStakingContract.unstake(stakedAmount)
   await tx.wait()
 }
 
@@ -157,6 +201,8 @@ export async function buyArtifact(
   scriptId: string,
   amount: number
 ) {
+  const approveTx = await approveToken(provider, scriptId)
+
   const liquidStakingContract = await getLiquidStakingContract(
     provider,
     scriptId
@@ -172,4 +218,43 @@ export async function claimRewards(provider: any, scriptId: string) {
   )
   const tx = liquidStakingContract.claimRewards()
   await tx.wait()
+}
+
+export async function getStakedAmount(
+  provider: any,
+  scriptId: string,
+  address: string
+) {
+  const liquidStakingContract = await getLiquidStakingContract(
+    provider,
+    scriptId
+  )
+  const stakedAmount = await liquidStakingContract.stakes(address)
+  return stakedAmount
+}
+
+export async function getRewards(
+  provider: any,
+  scriptId: string,
+  address: string
+) {
+  const liquidStakingContract = await getLiquidStakingContract(
+    provider,
+    scriptId
+  )
+  const totalRewardPool = await liquidStakingContract.totalRewardPool()
+  const userStake = await liquidStakingContract.stakes(address)
+  const totalStaked = await liquidStakingContract.totalStaked()
+  const rewards = totalRewardPool.mul(userStake).div(totalStaked)
+  return rewards
+}
+
+export async function balanceOfRewardToken(
+  provider: any,
+  scriptId: string,
+  address: string
+) {
+  const rewardToken = await getRewardTokenContract(provider)
+
+  return await rewardToken.balanceOf(address)
 }

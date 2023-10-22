@@ -1,9 +1,16 @@
 import { useUserContext } from "@/context/UserContext"
-import { buyArtifact, getScript, stakeOnScript } from "@/services/Script"
+import {
+  buyArtifact,
+  getScript,
+  getScriptOwner,
+  getStakedAmount,
+  stakeOnScript,
+} from "@/services/Script"
 import { Content } from "@unscripted/shared-types"
 import { useRouter } from "next/router"
 import { FC, useEffect, useRef, useState } from "react"
 import Modal from "../Modal"
+import { Loader } from "../Loader"
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ScriptProps {}
@@ -19,6 +26,10 @@ export const Script: FC<ScriptProps> = () => {
   const [openStakeModal, setOpenStakeModal] = useState(false)
   const [openBuyModal, setOpenBuyModal] = useState(false)
   const [stakingAmount, setStakingAmount] = useState(0)
+  const [isOwner, setIsOwner] = useState(false)
+  const [staking, setStaking] = useState(false)
+  const [buying, setBuying] = useState(false)
+
   const contentRef = useRef<HTMLTextAreaElement>(null) // ref for the content textarea
 
   useEffect(() => {
@@ -42,12 +53,24 @@ export const Script: FC<ScriptProps> = () => {
     }
   }, [])
 
+  const updateScriptOwner = async () => {
+    const scriptOwner = await getScriptOwner(
+      provider,
+      router.query.scriptId as string
+    )
+    if (signInInfo?.eoa === scriptOwner) {
+      setIsOwner(true)
+    }
+  }
+
   useEffect(() => {
     console.log({ router })
-    if (router.query?.scriptId) {
+    if (router.query?.scriptId && provider) {
       void (async () => {
+        await updateScriptOwner()
         const scriptContent = await getScript(router.query.scriptId as string)
         console.log({ scriptContent })
+
         setTitle(scriptContent.title)
         setContent(scriptContent.content)
         setGenres(scriptContent.genres)
@@ -55,9 +78,14 @@ export const Script: FC<ScriptProps> = () => {
         setCost(scriptContent.cost || 0)
       })()
     }
-  }, [router.query?.scriptId])
+  }, [router.query?.scriptId, provider])
 
-  if (!title) return <span className="loading loading-ring loading-lg"></span>
+  if (!title)
+    return (
+      <div className="flex flex-col px-64  justify-start pt-8 h-full">
+        <Loader mode="light" />
+      </div>
+    )
 
   return (
     <div className="flex flex-col px-64  justify-start pt-8 h-full">
@@ -118,25 +146,27 @@ export const Script: FC<ScriptProps> = () => {
             )
           })}
       </div>
-      <div className="flex flex-row items-center space-x-4 w-full justify-end mt-8">
-        <button
-          className="btn btn-circle btn-outline w-36 md:p-4 "
-          onClick={() => {
-            setStakingAmount(0)
-            setOpenStakeModal(true)
-          }}
-        >
-          Stake
-        </button>
-        <button
-          className="btn btn-circle btn-outline w-36 md:p-4 "
-          onClick={() => {
-            setOpenBuyModal(true)
-          }}
-        >
-          Buy
-        </button>
-      </div>
+      {!isOwner && (
+        <div className="flex flex-row items-center space-x-4 w-full justify-end mt-8">
+          <button
+            className="btn btn-circle btn-outline w-36 md:p-4 "
+            onClick={() => {
+              setStakingAmount(0)
+              setOpenStakeModal(true)
+            }}
+          >
+            Stake
+          </button>
+          <button
+            className="btn btn-circle btn-outline w-36 md:p-4 "
+            onClick={() => {
+              setOpenBuyModal(true)
+            }}
+          >
+            Buy
+          </button>
+        </div>
+      )}
       {openStakeModal && (
         <Modal>
           {" "}
@@ -163,16 +193,31 @@ export const Script: FC<ScriptProps> = () => {
             <button
               className="btn btn-circle w-full btn-secondary mt-4"
               onClick={async () => {
-                setOpenStakeModal(false)
+                setStaking(true)
                 const res = await stakeOnScript(
                   provider,
                   router.query.scriptId as string,
                   stakingAmount
                 )
+                const stakedAmount = await getStakedAmount(
+                  provider,
+                  router.query.scriptId as string,
+                  signInInfo?.eoa
+                )
+
+                console.log({ stakedAmount })
+
+                setStaking(false)
+                setOpenStakeModal(false)
+
                 console.log({ res })
               }}
             >
-              Stake
+              <div className="flex flex-row items-center">
+                {" "}
+                {staking && <Loader mode="dark" />}
+                <div className="ml-2">Stake</div>
+              </div>
             </button>
           </div>
         </Modal>
@@ -197,15 +242,22 @@ export const Script: FC<ScriptProps> = () => {
             <button
               className="btn btn-circle w-full btn-secondary mt-4"
               onClick={async () => {
+                setBuying(true)
                 const res = await buyArtifact(
                   provider,
                   router.query.scriptId as string,
                   cost
                 )
-                console.log({ res })
+                await updateScriptOwner()
+                setBuying(false)
+                setOpenBuyModal(false)
               }}
             >
-              Buy
+              <div className="flex flex-row items-center">
+                {" "}
+                {buying && <Loader mode="dark" />}
+                <div className="ml-2">Buy</div>
+              </div>
             </button>
           </div>
         </Modal>

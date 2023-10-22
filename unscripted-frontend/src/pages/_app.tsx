@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes"
 
 import type { AppProps } from "next/app"
 import { QueryClient, QueryClientProvider } from "react-query"
+import { AutoLogin } from "@/components/ui/AutoLogin"
 const queryClient = new QueryClient()
 
 function MyApp({ Component, pageProps }: AppProps) {
@@ -12,7 +13,9 @@ function MyApp({ Component, pageProps }: AppProps) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <UserContext.Provider value={userContext}>
-          <Component {...pageProps} />
+          <AutoLogin>
+            <Component {...pageProps} />
+          </AutoLogin>
         </UserContext.Provider>
       </ThemeProvider>
     </QueryClientProvider>
